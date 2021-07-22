@@ -6,6 +6,7 @@ function App() {
 
   const [titulo, setTitulo] = useState('')
   const [autor, setAutor] = useState('')
+  const [posts, setPosts] = useState([])
 
 
   async function handleAdd() {
@@ -33,8 +34,33 @@ function App() {
 
 
   async function buscarPost() {
+
     await firebase.firestore().collection('posts')
-    .doc('')
+    .get()
+    .then((snapshort)=>{
+        let lista = []
+        snapshort.forEach((doc)=>{
+          lista.push({
+            id: doc.id,
+            titulo: doc.data().titulo,
+            autor: doc.data().autor,
+          })
+        }) 
+
+        setPosts(lista)
+
+    })
+    .catch(()=>{
+      alert('deu algum erro..')
+    })
+
+
+
+
+    // buscando 1 por vez
+ /*
+    await firebase.firestore().collection('posts')
+    .doc('123')
     .get()
     .then((snapshot) => {
       setTitulo(snapshot.data().titulo)
@@ -43,6 +69,7 @@ function App() {
     .catch(()=>{
       console.log('Deu algum erro')
     })
+ */ 
   }
 
 
@@ -58,7 +85,21 @@ function App() {
 
           <button onClick={handleAdd}>Cadastrar</button>
           <button onClick={buscarPost}>Buscar Post</button>
-          </div>
+
+          <ul>
+            {posts.map((post)=>{
+              return(
+                <li key={post.id}>
+                  <span>Titulo: {post.titulo}</span> <br/>
+                  <span>Autor: {post.autor}</span><br/><br/>
+                </li>
+              )
+            })}
+          </ul>
+
+
+
+        </div>
     </div>
   );
 }
