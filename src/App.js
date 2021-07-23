@@ -16,6 +16,8 @@ function App() {
   const [user, setUser] = useState(false);
   const [userLogado, setUserLogado] = useState({});
 
+  const [nome, setNome] = useState('');
+  const [cargo, setCargo] = useState('');
 
 
 
@@ -71,8 +73,6 @@ function App() {
       
     };
   }, []);
-
-
 
 
 
@@ -173,7 +173,6 @@ function App() {
   }
 
 
-
 // ========== função para cadastrar novo usuario
 
   async function novoUsuario() {
@@ -218,26 +217,36 @@ function App() {
     <div className="App">
       <h1>ReactJs + Firebase .</h1> <br/>
         
-        
-        {user && (
-          <div>
-            <strong>Seja bem vindo - Está logado</strong><br/>
-            <span>{userLogado.uid} - {userLogado.email}</span> <br/><br/>
-          </div>
-        )}
-
+  
 
         <div className="container">
           <h2>Cadastro de Usuário</h2>
+
+          <label>Nome</label>
+          <input type="text" value={nome} onChange={(e) => setNome(e.target.value)} /><br/>
+
+          <label>Cargo</label>
+          <input type="text" value={cargo} onChange={(e) => setCargo(e.target.value)} /><br/>
+
           <label>Email</label>
           <input type="text" value={email} onChange={(e) => setEmail(e.target.value)} /><br/>
+          
           <label>Senha</label>
           <input type="password" value={senha} onChange={(e) => setSenha(e.target.value)} /><br/>
-          <button onClick={novoUsuario}>Cadastrar</button> <br/> 
-          <button onClick={login}>Login</button> <br/> 
-          <button onClick={logout}>Logout</button><br/>
+          
+          <button onClick={novoUsuario}>Cadastrar</button> <br/>   
+          <button onClick={logout}>Logout</button><br/><br/>
         
         </div>
+
+
+
+
+
+
+
+
+
 
 
         <div className="container">
