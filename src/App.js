@@ -10,8 +10,16 @@ function App() {
   const [autor, setAutor] = useState('')
   const [posts, setPosts] = useState([])
   
+  //useState de login
+  const [email, setEmail] = useState('');
+  const [senha, setSenha] = useState('');
+  const [user, setUser] = useState(false);
+  const [userLogado, setUserLogado] = useState({});
 
-  //minhas useEffect
+
+
+
+  //xxxxxxxxxxxxx minhas useEffect
   // carregar a lista assim que abrir
   useEffect(() => {
   
@@ -35,6 +43,36 @@ function App() {
 
     loadPosts()
   }, []);
+
+
+  // carregar usuario
+  useEffect(() => {
+    async function checkLogin(params) {
+      await firebase.auth().onAuthStateChanged((user) => {
+        if (user) {
+          // se tiver algum usuário logado ele chega aqui
+          setUser(true)
+          setUserLogado({
+            uid: user.uid,
+            email: user.email,
+          })
+        }else{
+          // não possui nenhum user logado
+          setUser(false)
+          setUserLogado({
+
+          })
+        }
+      })
+    }
+    checkLogin()
+
+    return () => {
+      
+    };
+  }, []);
+
+
 
 
 
@@ -132,14 +170,45 @@ function App() {
     .catch(()=>{
       console.log('Deu algum problema ao excluir os dados')
     })
+  }
+
+
+
+// ========== função para cadastrar novo usuario
+
+  async function novoUsuario() {
+    await firebase.auth().createUserWithEmailAndPassword(email, senha)
+    .then((value) => {
+      console.log(value)
+    })
+    .catch((error)=>{
+      if (error.code === 'auth/weak-password') {
+        alert('Sua senha é muito fraca')
+      } else if(error.code === 'auth/email-already-in-use'){
+        alert('Esse email já existe.')
+      }
+    })
 
 
   }
 
 
+//--------- função para logout
 
+  async function logout() {
+    await firebase.auth().signOut()
+  }
 
-
+// -------- função login
+  async function login() {
+    await firebase.auth().signInWithEmailAndPassword(email, senha)
+    .then((value)=>{
+      console.log(value)
+    })
+    .catch((error)=>{
+      console.log('ERRO AO FAZER LOGIN' + error)
+    })
+  }
 
 // HTML
 
@@ -148,8 +217,31 @@ function App() {
   return (
     <div className="App">
       <h1>ReactJs + Firebase .</h1> <br/>
+        
+        
+        {user && (
+          <div>
+            <strong>Seja bem vindo - Está logado</strong><br/>
+            <span>{userLogado.uid} - {userLogado.email}</span> <br/><br/>
+          </div>
+        )}
+
+
         <div className="container">
- 
+          <h2>Cadastro de Usuário</h2>
+          <label>Email</label>
+          <input type="text" value={email} onChange={(e) => setEmail(e.target.value)} /><br/>
+          <label>Senha</label>
+          <input type="password" value={senha} onChange={(e) => setSenha(e.target.value)} /><br/>
+          <button onClick={novoUsuario}>Cadastrar</button> <br/> 
+          <button onClick={login}>Login</button> <br/> 
+          <button onClick={logout}>Logout</button><br/>
+        
+        </div>
+
+
+        <div className="container">
+          <h2>Banco de dados</h2>
           <label>ID:</label>
           <input type="text" value={idPost} onChange={(e) => setIdPost(e.target.value)} />
 
