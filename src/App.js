@@ -19,6 +19,8 @@ function App() {
   const [nome, setNome] = useState('');
   const [cargo, setCargo] = useState('');
 
+  const [usuario, setUsuario] = useState({});
+
 
 
   //xxxxxxxxxxxxx minhas useEffect
@@ -73,7 +75,6 @@ function App() {
       
     };
   }, []);
-
 
 
 //----------- adiciona um post
@@ -177,8 +178,25 @@ function App() {
 
   async function novoUsuario() {
     await firebase.auth().createUserWithEmailAndPassword(email, senha)
-    .then((value) => {
-      console.log(value)
+    .then( async (value) => {
+      firebase.firestore().collection('users')
+      .doc(value.user.uid)
+      .set({
+        nome: nome,
+        cargo: cargo,
+        status: true,
+      })
+      .then(()=>{
+        setNome('')
+        setCargo('')
+        setEmail('')
+        setSenha('')
+      })
+      .catch(()=>{
+        alert('Deu algum erro no cadastro')
+      })
+
+
     })
     .catch((error)=>{
       if (error.code === 'auth/weak-password') {
@@ -196,22 +214,38 @@ function App() {
 
   async function logout() {
     await firebase.auth().signOut()
+    setUsuario({})
   }
+
 
 // -------- função login
   async function login() {
     await firebase.auth().signInWithEmailAndPassword(email, senha)
-    .then((value)=>{
-      console.log(value)
+    .then(async (value) => {
+      await firebase.firestore().collection('users')
+      .doc(value.user.uid)
+      .get()
+      .then((snapshot)=>{
+        setUsuario({
+          nome: snapshot.data().nome,
+          cargo: snapshot.data().cargo,
+          status: snapshot.data().status,
+          email: value.user.email
+        })
+      })
+
     })
     .catch((error)=>{
       console.log('ERRO AO FAZER LOGIN' + error)
     })
   }
 
-// HTML
 
 
+
+
+
+// ------- HTML
 
   return (
     <div className="App">
@@ -234,10 +268,29 @@ function App() {
           <label>Senha</label>
           <input type="password" value={senha} onChange={(e) => setSenha(e.target.value)} /><br/>
           
+          <button onClick={login}>Login</button><br/>
           <button onClick={novoUsuario}>Cadastrar</button> <br/>   
           <button onClick={logout}>Logout</button><br/><br/>
         
+
+          <hr/><br/>
+          
+          {Object.keys(usuario).length > 0 && (
+            <div>
+              <strong>Olá </strong>{usuario.nome}<br/>
+              <strong>Cargo: </strong>{usuario.cargo}<br/>
+              <strong>Email: </strong>{usuario.email}<br/>
+              <strong>Status: </strong>{usuario.status ? 'ATIVO' : 'DESATIVADO'}<br/>
+
+            </div>
+          )}
+
+
+
+
         </div>
+
+        
 
 
 
